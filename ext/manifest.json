@@ -23,6 +23,7 @@
     "default_title": "browser action demo",
     "default_popup": "src/browser_action/browser_action.html"
   },
+  "web_accessible_resources": ["src/inject/inject.css"],
   "permissions": [
 	"storage",
     "contextMenus",
