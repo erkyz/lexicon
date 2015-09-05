@@ -31,7 +31,6 @@ function sendDifficulty() {
 	});
 	chrome.runtime.sendMessage({newDifficulty : difficulty});
 }
-
 getDifficulty();
 
 $('input[type="range"]').change(function() {
@@ -42,4 +41,3 @@ $('input[type="range"]').change(function() {
 		sendDifficulty();
 	}
 });
-

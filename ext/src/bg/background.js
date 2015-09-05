@@ -15,22 +15,29 @@ chrome.runtime.onMessage.addListener(
         jQuery.extend(difficulties, data);
         sendResponse(data);
       });
-    
+
     } else if (request.newDifficulty) {
       if (request.newDifficulty > currentDifficulty) {
-        $.each(difficulties, function(word,difficulty) {
-          if (difficulty > currentDifficulty)
-            $(body).replace(request.highlight, "<span id='highlight'>" + request.highlight + "</span>");
+        $.each(difficulties, function(word,wordDifficulty) {
+          if (wordDifficulty > currentDifficulty)
+			#("body").highlight(word);
         });
       } else if (request.newDifficulty < currentDifficulty) {
           $.each(difficulties, function(word,difficulty) {
             if (difficulty > currentDifficulty)
-              $(body).replace(request.highlight, request.highlight.innerHTML);
+				#("body").removeHighlight(word);
           });
       }
-    }
-
-    sendResponse();
+    } else {
+		sendResponse();
+	}
   });
-   
+
+<style>
+.highlight {
+	background-color:"yellow";
+}
+</style>
+
+
 // TODO openPopup

@@ -11,7 +11,7 @@ chrome.runtime.sendMessage({}, function(response) {
     // TODO parse out javascript
     text = $("body").text().replace(/[^a-zA-Z]/g, " ");
     words = text.split(/\s+/);
-   
+
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
@@ -22,8 +22,3 @@ chrome.runtime.sendMessage({}, function(response) {
 	}
 	}, 10);
 });
-
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    currentDifficulty = request.newDifficulty;
-  });
