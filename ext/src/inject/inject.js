@@ -6,7 +6,6 @@ chrome.runtime.sendMessage({}, function(response) {
 
 		// ----------------------------------------------------------
 		// This part of the script triggers when page is done loading
-    
     text = "";
     var getTextNodesIn = function(el) {
       return $(el).find(":not(iframe):not(script):not(style)").contents().filter(function() {
@@ -40,7 +39,3 @@ function highlightWords(difficulty, words) {
 
 }
 
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    currentDifficulty = request.newDifficulty;
-  });
