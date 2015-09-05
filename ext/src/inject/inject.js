@@ -30,26 +30,26 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     words = $.map(words, function(word) {
       return word.toLowerCase().replace(/[^a-zA-Z'.]/g, " ").replace(/\.+$/, " ").trim();
     });
-   
+
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-      console.log(response.toAdd); 
+      console.log(response.toAdd);
       console.log(response.toRemove);
       for (var i = 0; i < response.toAdd.length; i++) {
         console.log(response.toAdd[i]);
         $('p').html(function(idx, oldHtml){
           console.log("old", oldHtml);
-          var newHtml = oldHtml.replace(new RegExp( "(" + preg_quote( response.toAdd[i] ) + ")" , 'gi' ), "<b class='highlighted'>$1</b>");
+          var newHtml = oldHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[i] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
           console.log("new", newHtml);
           return newHtml;
         });
       }
       for (var i = 0; i < response.toRemove.length; i++) {
       $('body').unhighlight(response.toRemove[i]);
-    
+
       }
     });
 
