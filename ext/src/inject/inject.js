@@ -30,13 +30,13 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     words = $.map(words, function(word) {
       return word.toLowerCase().replace(/[^a-zA-Z'.]/g, " ").replace(/\.+$/, " ").trim();
     });
-   
+
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-      console.log(response.toAdd); 
+      console.log(response.toAdd);
       console.log(response.toRemove);
       $('body').html(function(idx, oldHtml){
         var newHtml = oldHtml;
@@ -47,12 +47,7 @@ chrome.runtime.sendMessage({init:true}, function(response) {
         return newHtml;
       });
      
-      /*  
-      for (var i = 0; i < response.toRemove.length; i++) {
-        $('body').unhighlight(response.toRemove[i]);
-      }
-      */
-    });
+      });
 
 		// ----------------------------------------------------------
 	}
