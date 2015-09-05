@@ -8,13 +8,12 @@ difficulties = {}
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
+    sendResponse();
     if (request.getDifficulties) {
       console.log(request.getDifficulties);
       getDifficulties(request.getDifficulties,onReceivedDifficulties);
-    } else if request.newDifficulty {
-      console.log(request.newDifficulty);
+      sendResponse(request.getDifficulties);
     }
-    sendResponse();
   });
 
 function onReceivedDifficulties(res) {
@@ -22,3 +21,5 @@ function onReceivedDifficulties(res) {
   jQuery.extend(difficulties,res);
   chrome.runtime.sendMessage({openPopup:true});
 }
+
+// TODO openPopup

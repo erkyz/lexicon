@@ -1,3 +1,6 @@
+var currentDifficulty = 50;
+var difficulties = {}
+
 chrome.runtime.sendMessage({}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
 	if (document.readyState === "complete") {
@@ -12,7 +15,10 @@ chrome.runtime.sendMessage({}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-    chrome.runtime.sendMessage({getDifficulties:uniqueWords});
+    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
+      console.log(difficulties);
+      difficulties = response; 
+    });
 		// ----------------------------------------------------------
 	}
 	}, 10);
@@ -20,7 +26,19 @@ chrome.runtime.sendMessage({}, function(response) {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if (request.highlight) {
-      $(body).replace(request.highlight, "<span id='highlight'>" + request.highlight + "</span>");
+    if (request.newDifficulty) {
+      if (request.newDifficulty > currentDifficulty) {
+        $.each(difficulties, function(word,difficulty) {
+          if (difficulty > currentDifficulty)
+            $(body).replace(request.highlight, "<span id='highlight'>" + request.highlight + "</span>");
+        });
+      } else if (request.newDifficulty < currentDifficulty) {
+          $.each(difficulties, function(word,difficulty) {
+            if (difficulty > currentDifficulty)
+              $(body).replace(request.highlight, request.highlight.innerHTML);
+          });
+      }
+
+      currentDifficulty = request.newDifficulty;
     }
   });
