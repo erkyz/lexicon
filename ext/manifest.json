@@ -14,8 +14,7 @@
     "scripts": [
       "js/jquery/jquery.min.js",
       "src/http/difficulty.js",
-      "src/bg/background.js",
-	  "js/jquery/jquery.highlight-5.js"
+      "src/bg/background.js"
     ],
     "persistent": true
   },
@@ -44,6 +43,7 @@
       ],
       "js": [
         "js/jquery/jquery.min.js",
+	      "js/jquery/jquery.highlight-5.js",
         "src/inject/inject.js"
       ]
     }

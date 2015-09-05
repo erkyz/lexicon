@@ -6,31 +6,38 @@
 var currentDifficulty = 50;
 var difficulties = {}
 
+function calculateToHighlight(newDifficulty,words) {
+  if (newDifficulty > currentDifficulty) {
+    $.each(difficulties, function(word,wordDifficulty) {
+      if (wordDifficulty < newDifficulty && wordDifficulty > currentDifficulty)
+      chrome.runtime.sendMessage({removeHighlight: word});
+    });
+  } else if (newDifficulty < currentDifficulty) {
+      $.each(difficulties, function(word,difficulty) {
+        if (wordDifficulty > newDifficulty && wordDifficulty < currentDifficulty)
+        chrome.runtime.sendMessage({addHighlight: word});
+      });
+}
+
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.getDifficulties) {
       console.log(request.getDifficulties);
-      getDifficulties(request.getDifficulties, function(data) {
-        for (var attrname in data) { difficulties[attrname] = data[attrname]; }
+      getDifficulties(request.getDifficulties, function(res) {
+        for (var attrname in res) { difficulties[attrname] = res[attrname]; }
         console.log(difficulties);
+        sendResponse(currentDifficulty, res);
       });
 
     } else if (request.newDifficulty) {
-      if (request.newDifficulty > currentDifficulty) {
-        $.each(difficulties, function(word,wordDifficulty) {
-          if (wordDifficulty > currentDifficulty)
-			#("body").highlight(word);
-        });
-      } else if (request.newDifficulty < currentDifficulty) {
-          $.each(difficulties, function(word,difficulty) {
-            if (difficulty > currentDifficulty)
-				#("body").removeHighlight(word);
-          });
-      }
-    } else {
-		sendResponse();
-	}
+
+        currentDifficluty = request.newDifficulty;
+    }
+      chrome.runtime.sendMessage({
+    } else if (request.init) {
+      sendResponse();
+	  }
   });
 
 <style>
