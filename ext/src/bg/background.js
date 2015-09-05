@@ -4,7 +4,7 @@
 // });
 
 var currentDifficulty = 50;
-difficulties = {}
+var difficulties = {}
 
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
@@ -12,8 +12,8 @@ chrome.runtime.onMessage.addListener(
     if (request.getDifficulties) {
       console.log(request.getDifficulties);
       getDifficulties(request.getDifficulties, function(data) {
-        jQuery.extend(difficulties, data);
-        sendResponse(data);
+        for (var attrname in data) { difficulties[attrname] = data[attrname]; }
+        console.log(difficulties);
       });
 
     } else if (request.newDifficulty) {
