@@ -1,5 +1,3 @@
-var currentDifficulty = 50;
-var difficulties = {}
 
 chrome.runtime.sendMessage({}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
@@ -9,6 +7,8 @@ chrome.runtime.sendMessage({}, function(response) {
 		// ----------------------------------------------------------
 		// This part of the script triggers when page is done loading
 		console.log("Hello. This message was sent from scripts/inject.js");
+    console.log($("p").text());
+    // TODO parse out javascript
     text = $("body").text().replace(/[^a-zA-Z]/g, " ");
     words = text.split(/\s+/);
    
@@ -16,8 +16,7 @@ chrome.runtime.sendMessage({}, function(response) {
       return words.indexOf(item) == pos;
     });
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-      console.log(difficulties);
-      difficulties = response; 
+      console.log(response);
     });
 		// ----------------------------------------------------------
 	}
@@ -26,19 +25,5 @@ chrome.runtime.sendMessage({}, function(response) {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if (request.newDifficulty) {
-      if (request.newDifficulty > currentDifficulty) {
-        $.each(difficulties, function(word,difficulty) {
-          if (difficulty > currentDifficulty)
-            $(body).replace(request.highlight, "<span id='highlight'>" + request.highlight + "</span>");
-        });
-      } else if (request.newDifficulty < currentDifficulty) {
-          $.each(difficulties, function(word,difficulty) {
-            if (difficulty > currentDifficulty)
-              $(body).replace(request.highlight, request.highlight.innerHTML);
-          });
-      }
-
-      currentDifficulty = request.newDifficulty;
-    }
+    currentDifficulty = request.newDifficulty;
   });

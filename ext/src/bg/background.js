@@ -3,23 +3,34 @@
 //     "sample_setting": "This is how you use Store.js to remember values"
 // });
 
+var currentDifficulty = 50;
 difficulties = {}
 
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    sendResponse();
     if (request.getDifficulties) {
       console.log(request.getDifficulties);
-      getDifficulties(request.getDifficulties,onReceivedDifficulties);
-      sendResponse(request.getDifficulties);
+      getDifficulties(request.getDifficulties, function(data) {
+        jQuery.extend(difficulties, data);
+        sendResponse(data);
+      });
+    
+    } else if (request.newDifficulty) {
+      if (request.newDifficulty > currentDifficulty) {
+        $.each(difficulties, function(word,difficulty) {
+          if (difficulty > currentDifficulty)
+            $(body).replace(request.highlight, "<span id='highlight'>" + request.highlight + "</span>");
+        });
+      } else if (request.newDifficulty < currentDifficulty) {
+          $.each(difficulties, function(word,difficulty) {
+            if (difficulty > currentDifficulty)
+              $(body).replace(request.highlight, request.highlight.innerHTML);
+          });
+      }
     }
+
+    sendResponse();
   });
-
-function onReceivedDifficulties(res) {
-  console.log(res);
-  jQuery.extend(difficulties,res);
-  chrome.runtime.sendMessage({openPopup:true});
-}
-
+   
 // TODO openPopup
