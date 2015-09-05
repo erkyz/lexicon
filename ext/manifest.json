@@ -12,6 +12,8 @@
   "default_locale": "en",
   "background": {
     "scripts": [
+      "js/jquery/jquery.min.js",
+      "src/http/difficulty.js",
       "src/bg/background.js"
     ],
     "persistent": true
@@ -23,7 +25,7 @@
   },
   "permissions": [
     "contextMenus",
-    "http://elo-lasers.herokuapp.com"
+    "http://elo-lasers.herokuapp.com/"
   ],
   "content_scripts": [
     {
@@ -36,9 +38,10 @@
     },
     {
       "matches": [
-        "https://www.google.com/*"
+        "<all_urls>"
       ],
       "js": [
+        "js/jquery/jquery.min.js",
         "src/inject/inject.js"
       ]
     }
