@@ -38,19 +38,20 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
       console.log(response.toAdd); 
       console.log(response.toRemove);
-      for (var i = 0; i < response.toAdd.length; i++) {
-        console.log(response.toAdd[i]);
-        $('p').html(function(idx, oldHtml){
-          console.log("old", oldHtml);
-          var newHtml = oldHtml.replace(new RegExp( "(" + preg_quote( response.toAdd[i] ) + ")" , 'gi' ), "<b class='highlighted'>$1</b>");
-          console.log("new", newHtml);
-          return newHtml;
-        });
-      }
+      $('body').html(function(idx, oldHtml){
+        var newHtml = oldHtml;
+        for (var i = 0; i < response.toAdd.length; i++) {
+          console.log(response.toAdd[i]);
+          newHtml = newHtml.replace(new RegExp( "(" + preg_quote( response.toAdd[i] ) + ")" , 'gi' ), "<b class='highlighted'>$1</b>");
+        }
+        return newHtml;
+      });
+     
+      /*  
       for (var i = 0; i < response.toRemove.length; i++) {
-      $('body').unhighlight(response.toRemove[i]);
-    
+        $('body').unhighlight(response.toRemove[i]);
       }
+      */
     });
 
 		// ----------------------------------------------------------

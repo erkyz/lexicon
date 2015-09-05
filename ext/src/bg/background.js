@@ -1,10 +1,5 @@
-// if you checked "fancy-settings" in extensionizr.com, uncomment this lines
-// var settings = new Store("settings", {
-//     "sample_setting": "This is how you use Store.js to remember values"
-// });
-
 var myDifficulty = 50;
-var difficulties = {}
+var cacheDifficulties = {} // cap?
 
 function calculateHighlight(difficulties) {
   var res = {toAdd:[], toRemove:[]};
@@ -25,19 +20,22 @@ chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.getDifficulties) {
       console.log(request.getDifficulties);
+      var localDifficulties = {}
+      $.each(request.getDifficulties, function(word, wordDifficulty) {
+        if (cacheDifficulties[word]) 
+           localDifficulties[word] = wordDifficulty;
+      });
       getDifficulties(request.getDifficulties, function(res) {
-        for (var attrname in res) { difficulties[attrname] = res[attrname]; }
-        console.log(difficulties);
-        var res = calculateHighlight(difficulties);
-        console.log(res, "mu");
-        console.log(sendResponse);
-        sendResponse(res);
+        for (var attrname in res) { cacheDifficulties[attrname] = res[attrname]; }
+        for (var attrname in res) { localDifficulties[attrname] = res[attrname]; }
+        var toHighlight = calculateHighlight(localDifficulties);
+        sendResponse(toHighlight);
       });
     } else if (request.newDifficulty) {
-      calculateHighlight(request.newDifficulty,difficulties);
-      myDifficulty = request.newDifficulty;
+        chrome.runtime.sendMessage(calculateHighlight(request.newDifficulty,difficulties));
+        myDifficulty = request.newDifficulty;
     } else if (request.init) {
-      sendResponse();
+        sendResponse();
 	  }
     return true;
   });
