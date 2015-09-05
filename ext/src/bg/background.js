@@ -3,20 +3,22 @@
 //     "sample_setting": "This is how you use Store.js to remember values"
 // });
 
-var currentDifficulty = 50;
+var myDifficulty = 50;
 var difficulties = {}
 
-function calculateToHighlight(newDifficulty,words) {
-  if (newDifficulty > currentDifficulty) {
-    $.each(difficulties, function(word,wordDifficulty) {
-      if (wordDifficulty < newDifficulty && wordDifficulty > currentDifficulty)
-      chrome.runtime.sendMessage({removeHighlight: word});
-    });
-  } else if (newDifficulty < currentDifficulty) {
-      $.each(difficulties, function(word,difficulty) {
-        if (wordDifficulty > newDifficulty && wordDifficulty < currentDifficulty)
-        chrome.runtime.sendMessage({addHighlight: word});
+function calculateHighlight(difficulties) {
+  $.each(difficulties, function(word,wordDifficulty) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.insertCSS(tabs[0].id, {code: ".highlight{background-color:'yellow';}", runAt: "document_idle"}, function() {
+        if (wordDifficulty > myDifficulty) {
+          console.log(word,wordDifficulty);
+          chrome.tabs.sendMessage(tabs[0].id, {addHighlight:word}, function(response) {});
+        } else if (wordDifficulty < myDifficulty) { 
+          chrome.tabs.sendMessage(tabs[0].id, {removeHighlight:word}, function(response) {});
+        }
       });
+    });
+  });
 }
 
 //example of using a message handler from the inject scripts
@@ -27,24 +29,14 @@ chrome.runtime.onMessage.addListener(
       getDifficulties(request.getDifficulties, function(res) {
         for (var attrname in res) { difficulties[attrname] = res[attrname]; }
         console.log(difficulties);
-        sendResponse(currentDifficulty, res);
+        calculateHighlight(difficulties);
       });
-
     } else if (request.newDifficulty) {
-
-        currentDifficluty = request.newDifficulty;
-    }
-      chrome.runtime.sendMessage({
+      calculateHighlight(request.newDifficulty,difficulties);
+      myDifficulty = request.newDifficulty;
     } else if (request.init) {
       sendResponse();
 	  }
   });
-
-<style>
-.highlight {
-	background-color:"yellow";
-}
-</style>
-
 
 // TODO openPopup

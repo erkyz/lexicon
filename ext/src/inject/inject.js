@@ -29,7 +29,7 @@ chrome.runtime.sendMessage({init:true}, function(response) {
       return words.indexOf(item) == pos;
     });
     console.log(uniqueWords);
-    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, highlightWords);
+    chrome.runtime.sendMessage({getDifficulties:uniqueWords});
 
 		// ----------------------------------------------------------
 	}
@@ -39,8 +39,9 @@ chrome.runtime.sendMessage({init:true}, function(response) {
 chrome.runtime.onMessage.addListener(
   function(request,sender,sendResponse) {
     if (request.addHighlight) {
-      #("body").highlight(request.addHighlight);
+      console.log (request.addHighlight);
+      $('body *').highlight(request.addHighlight);
     } else if (request.removeHighlight) {
-      #("body").removeHighlight(request.removeHighlight);
+      $('body *').unhighlight(request.removeHighlight);
     }
   });

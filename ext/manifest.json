@@ -26,6 +26,7 @@
   "permissions": [
 	"storage",
     "contextMenus",
+    "<all_urls>",
     "http://elo-lasers.herokuapp.com/"
   ],
   "content_scripts": [
@@ -43,7 +44,7 @@
       ],
       "js": [
         "js/jquery/jquery.min.js",
-	      "js/jquery/jquery.highlight-5.js",
+        "bower_components/jquery-highlight/jquery.highlight.js",
         "src/inject/inject.js"
       ]
     }
