@@ -1,0 +1,32 @@
+{
+  "name": "rangeslider",
+  "version": "2.1.0",
+  "description": "Powerful range slider",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/genkikondo/rangeslider.git"
+  },
+  "main": "js/rangeslider.js",
+  "dependencies": {
+    "jquery": "2.1.1"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/genkikondo/rangeslider",
+  "_release": "2.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.1.0",
+    "commit": "798cb906b3ff96e1e36338733ee78dea2c85af9d"
+  },
+  "_source": "git://github.com/genkikondo/rangeslider.git",
+  "_target": "~2.1.0",
+  "_originalSource": "rangeslider",
+  "_direct": true
+}

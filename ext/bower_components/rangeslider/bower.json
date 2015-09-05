@@ -1,0 +1,21 @@
+{
+  "name": "rangeslider",
+  "version": "2.1.0",
+  "description": "Powerful range slider",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/genkikondo/rangeslider.git"
+  },
+  "main": "js/rangeslider.js",
+  "dependencies": {
+    "jquery": "2.1.1"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "license": "MIT"
+}
