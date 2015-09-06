@@ -57,22 +57,22 @@ function calculateHighlight(difficulties) {
 	return res;
 }
 
-function calculateHighlightUpdate(pageWords) {
+function calculateHighlightUpdate(pageWords, newDifficulty, oldDifficulty) {
 	if (pageWords.length > 0) {
-		getDifficulties(myWords, function(difficulties) {
+		getDifficulties(pageWords, function(difficulties) {
 			var highlights = {toAdd:[], toRemove:[]};
 			$.each(difficulties, function(word,wordDifficulty) {
 				wordDifficulty = parseInt(wordDifficulty);
 				newDifficulty = parseInt(newDifficulty);
-				if (newDifficulty < myDifficulty) {
+				if (newDifficulty < oldDifficulty) {
 					console.log("new difficulty : " + newDifficulty);
 					console.log("wordDifficulty : " + wordDifficulty);
-					if (wordDifficulty < myDifficulty && wordDifficulty > newDifficulty) {
+					if (wordDifficulty < oldDifficulty && wordDifficulty > newDifficulty) {
 						console.log("nuuhhh you got dumber " + word);
 						highlights.toAdd.push(word);
 					}
 				} else {
-					if (wordDifficulty > myDifficulty && wordDifficulty < newDifficulty) {
+					if (wordDifficulty > oldDifficulty && wordDifficulty < newDifficulty) {
 						console.log("old difficulty : " + myDifficulty);
 						console.log("word difficulty : " + wordDifficulty);
 						console.log("yayyy you got smarter " + word);
@@ -107,15 +107,16 @@ chrome.runtime.onMessage.addListener(
         } else if (request.newDifficulty) {
           	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
               chrome.tabs.sendMessage(tabs[0].id, {updatedPageDifficulty: request.newDifficulty}, calculateHighlightUpdate);
-            }); 
+            });
             console.log("recieved new difficulty");
             myDifficulty = request.newDifficulty;
             storeDifficulty();
-
         } else if (request.getDefinitions) {
             getDefinitions(request.getDefinitions, function(res) {
               sendResponse({"definitions": res});
             });
+        } else if (request.getDifficulty) {
+            sendResponse(myDifficulty);
         } else if (request.init) {
             sendResponse();
         }
