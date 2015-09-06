@@ -12,6 +12,9 @@ chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		if (request.highlightUpdate) {
 			handleWordHighlightUpdate(request.highlightUpdate);
+		} else if (request.updatedPageDifficulty) {
+			myDifficulty = updatedPageDifficulty;
+			sendResponse(myWords);
 		}
 	});
 
@@ -43,7 +46,7 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-	  mywords = uniqueWords;
+	  myWords = uniqueWords;
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
 		  handleWordHighlightUpdate(response);

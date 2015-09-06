@@ -57,29 +57,29 @@ function calculateHighlight(difficulties) {
 	return res;
 }
 
-function calculateHighlightUpdate(newDifficulty, difficulties) {
-	var res = {toAdd:[], toRemove:[]};
-	$.each(difficulties, function(word,wordDifficulty) {
-		wordDifficulty = parseInt(wordDifficulty);
-		newDifficulty = parseInt(newDifficulty);
-		if (newDifficulty < myDifficulty) {
-			console.log("new difficulty : " + newDifficulty);
-			console.log("wordDifficulty : " + wordDifficulty);
-			if (wordDifficulty < myDifficulty && wordDifficulty > newDifficulty) {
-				console.log("nuuhhh you got dumber " + word);
-				res.toAdd.push(word);
-			}
-		} else {
-			if (wordDifficulty > myDifficulty && wordDifficulty < newDifficulty) {
-				console.log("old difficulty : " + myDifficulty);
-				console.log("word difficulty : " + wordDifficulty);
-				console.log("yayyy you got smarter " + word);
-				res.toRemove.push(word);
-			}
-		}
-	});
-	return res;
-}
+function calculateHighlightUpdate(pageWords) {
+	if (pageWords.length > 0) {
+		getDifficulties(myWords, function(difficulties) {
+			var highlights = {toAdd:[], toRemove:[]};
+			$.each(difficulties, function(word,wordDifficulty) {
+				wordDifficulty = parseInt(wordDifficulty);
+				newDifficulty = parseInt(newDifficulty);
+				if (newDifficulty < myDifficulty) {
+					console.log("new difficulty : " + newDifficulty);
+					console.log("wordDifficulty : " + wordDifficulty);
+					if (wordDifficulty < myDifficulty && wordDifficulty > newDifficulty) {
+						console.log("nuuhhh you got dumber " + word);
+						highlights.toAdd.push(word);
+					}
+				} else {
+					if (wordDifficulty > myDifficulty && wordDifficulty < newDifficulty) {
+						console.log("old difficulty : " + myDifficulty);
+						console.log("word difficulty : " + wordDifficulty);
+						console.log("yayyy you got smarter " + word);
+						highlights.toRemove.push(word);
+					}
+				}
+			});
 
 
 var cacheDifficulties = {}; // cap?
