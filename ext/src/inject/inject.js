@@ -13,8 +13,8 @@ chrome.runtime.onMessage.addListener(
 		if (request.highlightUpdate) {
 			handleWordHighlightUpdate(request.highlightUpdate);
 		} else if (request.updatedPageDifficulty) {
-			myDifficulty = updatedPageDifficulty;
-			sendResponse(myWords);
+			sendResponse(myWords, request.updatedPageDifficulty, myDifficulty);
+			myDifficulty = request.updatedPageDifficulty;
 		}
 	});
 
@@ -50,11 +50,10 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-	  myWords = uniqueWords;
+	 myWords = uniqueWords;
+	 console.log("my words : " + myWords);
     console.log(uniqueWords);
-    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-		  handleWordHighlightUpdate(response);
-    });
+    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, handleWordHighlightUpdate);
 	}
 	}, 10);
 });
