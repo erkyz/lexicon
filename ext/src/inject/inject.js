@@ -40,7 +40,10 @@ chrome.runtime.sendMessage({init:true}, function(response) {
       difficulties.toRemove.sort();
       $('p').html(function(idx, oldHtml){
         var newHtml = oldHtml;
-        oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
+        oldHtml = oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ");
+        oldHtml.filter(function(item, pos) {
+          return oldHtml.indexOf(item) == pos;
+        }).filter(function(s) {
           return s != "";
         }).forEach(function(word) {
           addIndex = difficulties.toAdd.binaryIndexOf(word);
