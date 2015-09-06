@@ -12,8 +12,12 @@ chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		if (request.highlightUpdate) {
 			handleWordHighlightUpdate(request.highlightUpdate);
+		} else if (request.updatedPageDifficulty) {
+			myDifficulty = updatedPageDifficulty;
+			sendResponse(myWords);
 		}
 	});
+
 chrome.runtime.sendMessage({init:true}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
 	if (document.readyState === "complete") {
@@ -42,10 +46,10 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-	mywords = uniqueWords;
+	  myWords = uniqueWords;
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-		handleWordHighlightUpdate(response);
+		  handleWordHighlightUpdate(response);
     });
 	}
 	}, 10);
@@ -61,7 +65,10 @@ function handleWordHighlightUpdate(response) {
       highlights.toRemove.sort();
       $('p').html(function(idx, oldHtml){
         var newHtml = oldHtml;
-        oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
+        oldHtml = oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ");
+        oldHtml.filter(function(item, pos) {
+          return oldHtml.indexOf(item) == pos;
+        }).filter(function(s) {
           return s != "";
         }).forEach(function(word) {
           addIndex = highlights.toAdd.binaryIndexOf(word);
@@ -77,7 +84,6 @@ function handleWordHighlightUpdate(response) {
         return newHtml;
       });
 }
-
 
 
 /** from oli.me.uk
