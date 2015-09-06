@@ -16,7 +16,6 @@ chrome.runtime.sendMessage({init:true}, function(response) {
 	if (document.readyState === "complete") {
 		clearInterval(readyStateCheckInterval);
 
-		// ----------------------------------------------------------
 		// This part of the script triggers when page is done loading
     text = "";
     var getTextNodesIn = function(el) {
@@ -49,6 +48,29 @@ chrome.runtime.sendMessage({init:true}, function(response) {
 });
 
 function handleWordHighlightUpdate(response) {
+   	  console.log("to add:", response.toAdd);
+      console.log("to remove:", response.toRemove);
+      response.toAdd.sort();
+      response.toRemove.sort();
+      $('p').html(function(idx, oldHtml){
+        var newHtml = oldHtml;
+        oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
+          return s != "";
+        }).forEach(function(word) {
+          addIndex = response.toAdd.binaryIndexOf(word);
+          removeIndex = response.toRemove.binaryIndexOf(word);
+          if (addIndex >= 0) {
+            console.log("to highlight:", response.toAdd[addIndex]);
+            newHtml = newHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[addIndex] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
+          } else if (removeIndex >= 0) {
+            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( response.toRemove[i] ) + "</b>" , 'gi' ), response.toRemove[removeIndex]);
+          }
+        });
+        return newHtml;
+      });
+
+      });
+
       console.log(response.toAdd);
       console.log(response.toRemove);
       for (var i = 0; i < response.toAdd.length; i++) {
@@ -66,6 +88,43 @@ function handleWordHighlightUpdate(response) {
       }
 }
 
+
+
+/** from oli.me.uk
+ * Performs a binary search on the host array. This method can either be
+ * injected into Array.prototype or called with a specified scope like this:
+ * binaryIndexOf.call(someArray, searchElement);
+ *
+ * @param {*} searchElement The item to search for within the array.
+ * @return {Number} The index of the element which defaults to -1 when not found.
+ */
+function binaryIndexOf(searchElement) {
+    'use strict';
+
+    var minIndex = 0;
+    var maxIndex = this.length - 1;
+    var currentIndex;
+    var currentElement;
+
+    while (minIndex <= maxIndex) {
+        currentIndex = (minIndex + maxIndex) / 2 | 0;
+        currentElement = this[currentIndex];
+
+        if (currentElement < searchElement) {
+            minIndex = currentIndex + 1;
+        }
+        else if (currentElement > searchElement) {
+            maxIndex = currentIndex - 1;
+        }
+        else {
+            return currentIndex;
+        }
+    }
+
+    return -1;
+}
+Array.prototype.binaryIndexOf = binaryIndexOf;
+
 function preg_quote( str ) {
     // http://kevin.vanzonneveld.net
     // +   original by: booeyOH
@@ -82,14 +141,3 @@ function preg_quote( str ) {
     return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
 }
 
-/*
-chrome.runtime.onMessage.addListener(
-  function(request,sender,sendResponse) {
-    if (request.addHighlight) {
-      console.log (request.addHighlight);
-      $('body').highlight(request.addHighlight);
-    } else if (request.removeHighlight) {
-      $('body').unhighlight(request.removeHighlight);
-    }
-  });
-  */
