@@ -131,9 +131,11 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+/* TODO update when you open an existing tab
 chrome.tabs.onActivated.addListener(function(activeInfo) {
   chrome.tabs.sendMessage(activeInfo.tabId,{updatedPageDifficulty: myDifficulty}, calculateHighlightUpdate);
 });
+*/
 
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives
@@ -142,6 +144,6 @@ function updateKnowingness(info, tab) {
 };
 
 // add right-click events
-chrome.contextMenus.create({title: "I know or don't know this word uhhhhhhhhh", contexts:["selection"], onclick: updateKnowingness});
+chrome.contextMenus.create({title: "Toggle whether I know this word", contexts:["selection"], onclick: updateKnowingness});
 
 // TODO openPopup
