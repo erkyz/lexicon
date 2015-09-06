@@ -61,7 +61,9 @@ function calculateHighlightUpdate(obj) {
 	var newDifficulty = parseInt(obj["newDifficulty"]);
 	var oldDifficulty = parseInt(obj["oldDifficulty"]);
 	var pageWords = obj["pageWords"];
-	if (pageWords.length > 0) {
+	// check for undefined since switching to an active tab could send us info
+	// before it is ready to intialize it
+	if (newDifficulty && oldDifficulty && pageWords && pageWords.length > 0) {
 		getDifficulties(pageWords, function(difficulties) {
 			var highlights = {toAdd:[], toRemove:[]};
 			$.each(difficulties, function(word,wordDifficulty) {
