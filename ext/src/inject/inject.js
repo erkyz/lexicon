@@ -34,15 +34,14 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-    console.log(uniqueWords);
-    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-      console.log(response.toAdd);
-      console.log(response.toRemove);
+    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(resp) {
+      var difficulties = resp.difficulties;
+      var synonyms = resp.synonyms;
       $('body').html(function(idx, oldHtml){
         var newHtml = oldHtml;
-        for (var i = 0; i < response.toAdd.length; i++) {
-          console.log(response.toAdd[i]);
-          newHtml = newHtml.replace(new RegExp( "(" + preg_quote( response.toAdd[i] ) + ")" , 'gi' ), "<b class='highlighted'>$1</b>");
+        for (var i = 0; i < difficulties.toAdd.length; i++) {
+          var word = difficulties.toAdd[i];
+          newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>" );
         }
         return newHtml;
       });
