@@ -112,6 +112,10 @@ chrome.runtime.onMessage.addListener(
             myDifficulty = request.newDifficulty;
             storeDifficulty();
 
+        } else if (request.getDefinitions) {
+            getDefinitions(request.getDefinitions, function(res) {
+              sendResponse({"definitions": res});
+            });
         } else if (request.init) {
             sendResponse();
         }
@@ -123,31 +127,6 @@ chrome.runtime.onMessage.addListener(
 chrome.tabs.onActivated.addListener(function(activeInfo) {
   chrome.tabs.sendMessage(activeInfo.tabId,{updatedPageDifficulty: myDifficulty}, calculateHighlightUpdate);
 });
-
-var popupDOM = document.createElement('div');
-popupDOM.setAttribute('class', 'popup');
-document.body.appendChild(popupDOM);
-
-function renderPopup(mouseX, mouseY, selection) {
-  popupDOM.innerHTML = selection;
-  popupDOM.style.top = mouseY + 'px';
-  popupDOM.style.left = mouseX + 'px';
-  popupDOM.style.visibility = 'visible';
-}
-
-document.addEventListener('mouseup', function (e) {
-  var selection = window.getSelection().toString();
-  if (selection.length > 0) {
-    renderPopup(e.clientX, e.clientY, selection);
-  }
-  //var url = "http://elo-lasers.azurewebsites.net/get_definition?word=" + sText;
-}, false);
-
-// close popup on screen click
-document.addEventListener('mousedown', function(e) {
-  popupDOM.style.visibility = 'hidden';
-}, false);
-
 
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives
