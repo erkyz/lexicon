@@ -57,32 +57,37 @@ function calculateHighlight(difficulties) {
 	return res;
 }
 
-function calculateHighlightUpdate(pageWords, newDifficulty, oldDifficulty) {
+function calculateHighlightUpdate(obj) {
+	var newDifficulty = parseInt(obj["newDifficulty"]);
+	var oldDifficulty = parseInt(obj["oldDifficulty"]);
+	var pageWords = obj["pageWords"];
 	if (pageWords.length > 0) {
 		getDifficulties(pageWords, function(difficulties) {
 			var highlights = {toAdd:[], toRemove:[]};
 			$.each(difficulties, function(word,wordDifficulty) {
 				wordDifficulty = parseInt(wordDifficulty);
 				newDifficulty = parseInt(newDifficulty);
-				if (newDifficulty < oldDifficulty) {
-					console.log("new difficulty : " + newDifficulty);
-					console.log("wordDifficulty : " + wordDifficulty);
-					if (wordDifficulty < oldDifficulty && wordDifficulty > newDifficulty) {
-						console.log("nuuhhh you got dumber " + word);
-						highlights.toAdd.push(word);
-					}
-				} else {
-					if (wordDifficulty > oldDifficulty && wordDifficulty < newDifficulty) {
-						console.log("old difficulty : " + myDifficulty);
-						console.log("word difficulty : " + wordDifficulty);
-						console.log("yayyy you got smarter " + word);
-						highlights.toRemove.push(word);
+				if (wordDifficulty != "REDACTED") {
+					if (newDifficulty < oldDifficulty) {
+						if (wordDifficulty < oldDifficulty && wordDifficulty > newDifficulty) {
+							console.log("nuuhhh you got dumber " + word);
+							highlights.toAdd.push(word);
+						}
+					} else {
+						if (wordDifficulty > oldDifficulty && wordDifficulty < newDifficulty) {
+							console.log("old difficulty : " + oldDifficulty);
+							console.log("word difficulty : " + wordDifficulty);
+							console.log("yayyy you got smarter " + word);
+							highlights.toRemove.push(word);
+						}
 					}
 				}
+
 			});
 
       getSynonyms(highlights.toAdd, function(synonym_res) {
         chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
+			console.log("synonyms for update :" + synonym_res);
           chrome.tabs.sendMessage(tabs[0].id, {"highlightUpdate": {"highlights": highlights, "synonyms" : synonym_res}}, function(response) {});
         });
       });
@@ -120,7 +125,6 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-// send tabs that have been used before the new myDifficulty
 chrome.tabs.onActivated.addListener(function(activeInfo) {
   chrome.tabs.sendMessage(activeInfo.tabId,{updatedPageDifficulty: myDifficulty}, calculateHighlightUpdate);
 });
