@@ -10,7 +10,6 @@ chrome.runtime.sendMessage({init:true}, function(response) {
 	if (document.readyState === "complete") {
 		clearInterval(readyStateCheckInterval);
 
-		// ----------------------------------------------------------
 		// This part of the script triggers when page is done loading
     text = "";
     var getTextNodesIn = function(el) {
@@ -37,21 +36,67 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(resp) {
       var difficulties = resp.difficulties;
       var synonyms = resp.synonyms;
-      $('body').html(function(idx, oldHtml){
+      difficulties.toAdd.sort();
+      difficulties.toRemove.sort();
+      $('p').html(function(idx, oldHtml){
         var newHtml = oldHtml;
-        for (var i = 0; i < difficulties.toAdd.length; i++) {
-          var word = difficulties.toAdd[i];
-          newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>" );
-        }
+        oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
+          return s != "";
+        }).forEach(function(word) {
+          addIndex = difficulties.toAdd.binaryIndexOf(word);
+          removeIndex = difficulties.toRemove.binaryIndexOf(word);
+          if (addIndex >= 0) {
+            var word = difficulties.toAdd[addIndex];
+            console.log("to highlight:", word);
+            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>$2");
+          } else if (removeIndex >= 0) {
+            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( difficulties.toRemove[removeIndex] ) + " \([-a-zA-Z']*\)</b>" , 'gi' ), difficulties.toRemove[removeIndex]);
+          }
+        });
         return newHtml;
       });
      
       });
 
-		// ----------------------------------------------------------
 	}
 	}, 10);
 });
+
+
+/** from oli.me.uk
+ * Performs a binary search on the host array. This method can either be
+ * injected into Array.prototype or called with a specified scope like this:
+ * binaryIndexOf.call(someArray, searchElement);
+ *
+ * @param {*} searchElement The item to search for within the array.
+ * @return {Number} The index of the element which defaults to -1 when not found.
+ */
+function binaryIndexOf(searchElement) {
+    'use strict';
+ 
+    var minIndex = 0;
+    var maxIndex = this.length - 1;
+    var currentIndex;
+    var currentElement;
+ 
+    while (minIndex <= maxIndex) {
+        currentIndex = (minIndex + maxIndex) / 2 | 0;
+        currentElement = this[currentIndex];
+ 
+        if (currentElement < searchElement) {
+            minIndex = currentIndex + 1;
+        }
+        else if (currentElement > searchElement) {
+            maxIndex = currentIndex - 1;
+        }
+        else {
+            return currentIndex;
+        }
+    }
+ 
+    return -1;
+}
+Array.prototype.binaryIndexOf = binaryIndexOf;
 
 function preg_quote( str ) {
     // http://kevin.vanzonneveld.net
@@ -69,14 +114,3 @@ function preg_quote( str ) {
     return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
 }
 
-/*
-chrome.runtime.onMessage.addListener(
-  function(request,sender,sendResponse) {
-    if (request.addHighlight) {
-      console.log (request.addHighlight);
-      $('body').highlight(request.addHighlight);
-    } else if (request.removeHighlight) {
-      $('body').unhighlight(request.removeHighlight);
-    }
-  });
-  */

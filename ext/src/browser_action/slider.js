@@ -34,7 +34,7 @@ function sendDifficulty() {
 getDifficulty();
 
 $('input[type="range"]').change(function() {
-	// undfined means we are still trying to retrieve difficulty from storage
+	// undefined means we are still trying to retrieve difficulty from storage
 	if (difficulty != undefined) {
 		console.log("value : " + this.value);
 		difficulty = this.value;
