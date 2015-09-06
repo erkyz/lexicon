@@ -3,3 +3,12 @@
  **/
 
 .highlighted{background-color:yellow !important;}
+
+.selection_popup {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #ccc;
+  padding: 4px;
+}
