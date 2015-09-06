@@ -37,6 +37,9 @@
       ],
       "css": [
         "src/inject/inject.css"
+      ],
+      "run_at": [
+        "document_end"
       ]
     },
     {
