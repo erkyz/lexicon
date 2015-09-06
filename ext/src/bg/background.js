@@ -81,6 +81,15 @@ function calculateHighlightUpdate(pageWords) {
 				}
 			});
 
+      getSynonyms(highlights.toAdd, function(synonym_res) {
+        chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {"highlightUpdate": {"highlights": highlights, "synonyms" : synonym_res}}, function(response) {});
+        });
+      });
+    });
+  }
+}
+
 
 var cacheDifficulties = {}; // cap?
 var cacheSynonyms = {};
@@ -92,13 +101,13 @@ chrome.runtime.onMessage.addListener(
             getDifficulties(request.getDifficulties, function(res) {
                 var highlights = calculateHighlight(res);
                 getSynonyms(highlights.toAdd, function(synonym_res) {
-                    sendResponse({"highlights": toHighlight, "synonyms": synonym_res});
+                    sendResponse({"highlights": highlights, "synonyms": synonym_res});
                 });
           });
         } else if (request.newDifficulty) {
           	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-              chrome.tabs.sendMessage(tabs[0].id, {updatedPageDifficulty: quest.newDifficulty}, calculateHighlightUpdate);
-            });
+              chrome.tabs.sendMessage(tabs[0].id, {updatedPageDifficulty: request.newDifficulty}, calculateHighlightUpdate);
+            }); 
             console.log("recieved new difficulty");
             myDifficulty = request.newDifficulty;
             storeDifficulty();
