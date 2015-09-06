@@ -53,7 +53,7 @@ function fetchOrCache(words, fetch, cache, callback) {
                 cache[word] = value;
             });
             $.each(words, function(idx, word) {
-                if(cache[word] === null) {
+                if(cache[word] === null || cache[word] === "it") {
                     cache[word] = REDACTED;
                 }
             });

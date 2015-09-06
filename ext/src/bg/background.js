@@ -4,7 +4,7 @@
 // });
 
 var myDifficulty = 40;
-getDifficulty();
+var myDictionary = {};
 
 function getDifficulty() {
 	chrome.storage.local.get("difficulty", function(items) {
@@ -69,7 +69,7 @@ function calculateHighlightUpdate(obj) {
 			$.each(difficulties, function(word,wordDifficulty) {
 				wordDifficulty = parseInt(wordDifficulty);
 				newDifficulty = parseInt(newDifficulty);
-				if (wordDifficulty != REDACTED) {
+				if (wordDifficulty) {
 					if (newDifficulty < oldDifficulty) {
 						if (wordDifficulty < oldDifficulty && wordDifficulty > newDifficulty) {
 							console.log("nuuhhh you got dumber " + word);
