@@ -145,10 +145,10 @@ var popupDOM = document.createElement('div');
 popupDOM.setAttribute('class', 'selection_popup');
 document.body.appendChild(popupDOM);
 
-function renderPopup(mouseX, mouseY, selection) {
+function renderPopup(pageX, pageY, selection) {
   popupDOM.innerHTML = selection;
-  popupDOM.style.top = mouseY + 'px';
-  popupDOM.style.left = mouseX + 'px';
+  popupDOM.style.top = pageY + 'px';
+  popupDOM.style.left = pageX + 'px';
   popupDOM.style.visibility = 'visible';
 }
 
@@ -158,7 +158,7 @@ document.addEventListener('mouseup', function (e) {
   chrome.runtime.sendMessage({getDefinitions: [selection]}, function(response) {
     if (selection.length > 0) {
       definition = response.definitions[selection];
-      renderPopup(e.clientX, e.clientY, definition);
+      renderPopup(e.pageX, e.pageY, definition);
     }
   });
 });
