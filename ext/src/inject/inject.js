@@ -7,8 +7,8 @@ $(document).ready(function() {
 
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
-		if (request.wordHighlights) {
-			handleWordHighlightUpdate(request.wordHighlights);
+		if (request.highlightUpdate) {
+			handleWordHighlightUpdate(request.highlightUpdate);
 		}
 	});
 chrome.runtime.sendMessage({init:true}, function(response) {
@@ -48,22 +48,26 @@ chrome.runtime.sendMessage({init:true}, function(response) {
 });
 
 function handleWordHighlightUpdate(response) {
-   	  console.log("to add:", response.toAdd);
-      console.log("to remove:", response.toRemove);
-      response.toAdd.sort();
-      response.toRemove.sort();
+	 var highlights = response.highlights;
+	 console.log("highlights " + highlights);
+	 var synonyms = response.synonyms;
+   	  console.log("to add:", highlights.toAdd);
+      console.log("to remove:", highlights.toRemove);
+      highlights.toAdd.sort();
+      highlights.toRemove.sort();
       $('p').html(function(idx, oldHtml){
         var newHtml = oldHtml;
         oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
           return s != "";
         }).forEach(function(word) {
-          addIndex = response.toAdd.binaryIndexOf(word);
-          removeIndex = response.toRemove.binaryIndexOf(word);
+          addIndex = highlights.toAdd.binaryIndexOf(word);
+          removeIndex = highlights.toRemove.binaryIndexOf(word);
           if (addIndex >= 0) {
-            console.log("to highlight:", response.toAdd[addIndex]);
-            newHtml = newHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[addIndex] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
+            var word = highlights.toAdd[addIndex];
+            console.log("to highlight:", word);
+            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>$2");
           } else if (removeIndex >= 0) {
-            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( response.toRemove[removeIndex] ) + "</b>" , 'gi' ), response.toRemove[removeIndex]);
+            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( highlights.toRemove[removeIndex] ) + " \([-a-zA-Z']*\)</b>" , 'gi' ), highlights.toRemove[removeIndex]);
           }
         });
         return newHtml;

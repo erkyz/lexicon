@@ -5,7 +5,6 @@
 
 var myDifficulty = 40;
 getDifficulty();
-var cacheDifficulties = {}
 
 function getDifficulty() {
 	chrome.storage.local.get("difficulty", function(items) {
@@ -62,6 +61,8 @@ function calculateHighlightUpdate(newDifficulty, difficulties) {
 	var res = {toAdd:[], toRemove:[]};
 	$.each(difficulties, function(word,wordDifficulty) {
 		if (newDifficulty < myDifficulty) {
+			console.log("new difficulty : " + newDifficulty);
+			console.log("wordDifficulty : " + wordDifficulty);
 			if (wordDifficulty < myDifficulty && wordDifficulty > newDifficulty) {
 				console.log("nuuhhh you got dumber " + word);
 				res.toAdd.push(word);
@@ -80,30 +81,64 @@ function calculateHighlightUpdate(newDifficulty, difficulties) {
 
 function updateHighlights(highlights) {
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  		chrome.tabs.sendMessage(tabs[0].id, {wordHighlights:highlights}, function(response) {
+		console.log(highlights);
+  		chrome.tabs.sendMessage(tabs[0].id, {"highlightUpdate" : {"highlights":highlights}}, function(response) {
   });
 	});
-
 }
+
+var cacheDifficulties = {}; // cap?
+var cacheSynonyms = {};
 
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.getDifficulties) {
-      console.log(request.getDifficulties);
-      var localDifficulties = {}
-      $.each(request.getDifficulties, function(word, wordDifficulty) {
-        if (cacheDifficulties[word])
-           localDifficulties[word] = wordDifficulty;
+      var localDifficulties = {};
+      var localSynonyms = {};
+      var difficultiesNeeded = [];
+      var synonymsNeeded = [];
+      $.each(request.getDifficulties, function(idx, word) {
+        if (cacheDifficulties[word]) {
+           localDifficulties[word] = cacheDifficulties[word];
+        }
+        else {
+            difficultiesNeeded.push(word);
+        }
       });
-      getDifficulties(request.getDifficulties, function(res) {
-        for (var attrname in res) { cacheDifficulties[attrname] = parseInt(res[attrname]); }
-        for (var attrname in res) { localDifficulties[attrname] = parseInt(res[attrname]); }
+
+	  console.log("fetching difficulties");
+      getDifficulties(difficultiesNeeded, function(res) {
+
+        for (var attrname in res) {
+            localDifficulties[attrname] = parseInt(res[attrname]);
+            cacheDifficulties[attrname] = parseInt(res[attrname]);
+        }
         var toHighlight = calculateHighlight(localDifficulties);
-        sendResponse(toHighlight);
+
+        $.each(toHighlight.toAdd, function(idx, word) {
+            if (cacheSynonyms[word]) {
+               localSynonyms[word] = cacheSynonyms[word];
+            }
+            else {
+                synonymsNeeded.push(word);
+            }
+        });
+		console.log('fetching synonyms');
+        getSynonyms(synonymsNeeded, function(synonym_res) {
+            for (var attrname in synonym_res) {
+                localSynonyms[attrname] = synonym_res[attrname];
+                cacheSynonyms[attrname] = synonym_res[attrname];
+            }
+			console.log('got synonyms');
+            sendResponse({"highlights": toHighlight, "synonyms": localSynonyms});
+        });
       });
     } else if (request.newDifficulty) {
+		console.log("recieved new difficulty");
 		var res = calculateHighlightUpdate(request.newDifficulty, cacheDifficulties);
+		console.log("printing res");
+		console.log(res);
 		myDifficulty = request.newDifficulty;
 		storeDifficulty();
 		updateHighlights(res);
@@ -115,12 +150,15 @@ chrome.runtime.onMessage.addListener(
     return true;
   });
 
-// TODO
+// TODO: change either word difficulty level or user's knowledge level to adjust
+//   to feedback on false negatives or false positives
 function updateKnowingness(info, tab) {
   return true;
 };
 
-// TODO
+// TODO: we want this to make a nice little tooltip popup. There doesn't seem to
+//   be a nice way of doing this. The best way might just be to just overlay a
+//   div using javascript.
 function clickDefinition(info, tab) {
   var sText = info.selectionText;
   var url = "http://elo-lasers.azurewebsites.net/get_definition?word=" + sText;
