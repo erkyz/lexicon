@@ -140,3 +140,30 @@ function preg_quote( str ) {
     return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
 }
 
+// Create popup on document
+var popupDOM = document.createElement('div');
+popupDOM.setAttribute('class', 'selection_popup');
+document.body.appendChild(popupDOM);
+
+function renderPopup(mouseX, mouseY, selection) {
+  popupDOM.innerHTML = selection;
+  popupDOM.style.top = mouseY + 'px';
+  popupDOM.style.left = mouseX + 'px';
+  popupDOM.style.visibility = 'visible';
+}
+
+document.addEventListener('mouseup', function (e) {
+  var selection = window.getSelection().toString();
+  var definition;
+  chrome.runtime.sendMessage({getDefinitions: [selection]}, function(response) {
+    if (selection.length > 0) {
+      definition = response.definitions[selection];
+      renderPopup(e.clientX, e.clientY, definition);
+    }
+  });
+});
+
+// close popup on another click
+document.addEventListener('mousedown', function (e) {
+  popupDOM.style.visibility = 'hidden';
+});
