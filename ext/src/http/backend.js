@@ -3,7 +3,7 @@ var url = "http://elo-lasers.azurewebsites.net/";
 var cacheDifficulties = {}; // cap?
 var cacheSynonyms = {};
 var cacheDefinitions = {};
-var REDACTED = "REDACTED";
+var REDACTED = false;
 
 //Public methods
 function getDifficulties(words, callback) {

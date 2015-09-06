@@ -23,6 +23,10 @@ chrome.runtime.onMessage.addListener(
 		return true;
 	});
 
+function cleanWord(word) {
+    return word.toLowerCase().replace(/[^a-zA-Z'.]/g, " ").replace(/\.+$/, " ").trim();
+}
+    
 chrome.runtime.sendMessage({init:true}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
 	if (document.readyState === "complete") {
@@ -45,7 +49,7 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     }
     words = text.split(/\s+/);
     words = $.map(words, function(word) {
-      return word.toLowerCase().replace(/[^a-zA-Z'.]/g, " ").replace(/\.+$/, " ").trim();
+      return cleanWord(word);
     });
 
     uniqueWords = words.filter(function(item, pos) {
@@ -74,16 +78,26 @@ function handleWordHighlightUpdate(response) {
         }).filter(function(s) {
           return s != "";
         }).forEach(function(word) {
-          addIndex = highlights.toAdd.binaryIndexOf(word);
-          removeIndex = highlights.toRemove.binaryIndexOf(word);
+          var addIndex = highlights.toAdd.binaryIndexOf(word);
           if (addIndex >= 0) {
             var word = highlights.toAdd[addIndex];
             console.log("to highlight:", word);
-            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>$2");
-          } else if (removeIndex >= 0) {
-            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( highlights.toRemove[removeIndex] ) + " \([-a-zA-Z']*\)</b>" , 'gi' ), highlights.toRemove[removeIndex]);
+            var replaceWith = "<b class='highlighted'><b class='word'>$1</b> (" + synonyms[word] + ")</b>$2";
+            if(!synonyms[word]) {
+                replaceWith = "<b class='highlighted'><b class='word'>$1</b></b>$2";
+            }
+            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), replaceWith);
           }
         });
+        
+        $(".highlighted").each(function(idx, element) {
+            var word = $(this).find(".word").text();
+            var removeIndex  = highlights.toRemove.binaryIndexOf(cleanWord(word));
+            if (removeIndex >= 0) {
+                $(this).replaceWith(word);
+            }
+        });
+        
         return newHtml;
       });
 }
@@ -145,10 +159,10 @@ var popupDOM = document.createElement('div');
 popupDOM.setAttribute('class', 'selection_popup');
 document.body.appendChild(popupDOM);
 
-function renderPopup(mouseX, mouseY, selection) {
+function renderPopup(pageX, pageY, selection) {
   popupDOM.innerHTML = selection;
-  popupDOM.style.top = mouseY + 'px';
-  popupDOM.style.left = mouseX + 'px';
+  popupDOM.style.top = pageY + 'px';
+  popupDOM.style.left = pageX + 'px';
   popupDOM.style.visibility = 'visible';
 }
 
@@ -158,7 +172,7 @@ document.addEventListener('mouseup', function (e) {
   chrome.runtime.sendMessage({getDefinitions: [selection]}, function(response) {
     if (selection.length > 0) {
       definition = response.definitions[selection];
-      renderPopup(e.clientX, e.clientY, definition);
+      renderPopup(e.pageX, e.pageY, definition);
     }
   });
 });

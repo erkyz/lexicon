@@ -69,7 +69,7 @@ function calculateHighlightUpdate(obj) {
 			$.each(difficulties, function(word,wordDifficulty) {
 				wordDifficulty = parseInt(wordDifficulty);
 				newDifficulty = parseInt(newDifficulty);
-				if (wordDifficulty != "REDACTED") {
+				if (wordDifficulty != REDACTED) {
 					if (newDifficulty < oldDifficulty) {
 						if (wordDifficulty < oldDifficulty && wordDifficulty > newDifficulty) {
 							console.log("nuuhhh you got dumber " + word);
