@@ -38,9 +38,7 @@
       "css": [
         "src/inject/inject.css"
       ],
-      "run_at": [
-        "document_end"
-      ]
+      "run_at": "document_end"
     },
     {
       "matches": [
