@@ -5,6 +5,12 @@ $(document).ready(function() {
     .attr("href", chrome.extension.getURL('src/inject/inject.css')));
 });
 
+chrome.runtime.onMessage.addListener(
+	function(request, sender, sendResponse) {
+		if (request.wordHighlights) {
+			handleWordHighlightUpdate(request.wordHighlights);
+		}
+	});
 chrome.runtime.sendMessage({init:true}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
 	if (document.readyState === "complete") {
@@ -36,6 +42,13 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     });
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
+		handleWordHighlightUpdate(response);
+    });
+	}
+	}, 10);
+});
+
+function handleWordHighlightUpdate(response) {
       console.log(response.toAdd);
       console.log(response.toRemove);
       for (var i = 0; i < response.toAdd.length; i++) {
@@ -51,12 +64,7 @@ chrome.runtime.sendMessage({init:true}, function(response) {
       $('body').unhighlight(response.toRemove[i]);
 
       }
-    });
-
-		// ----------------------------------------------------------
-	}
-	}, 10);
-});
+}
 
 function preg_quote( str ) {
     // http://kevin.vanzonneveld.net
