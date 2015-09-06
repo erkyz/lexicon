@@ -70,36 +70,40 @@ function handleWordHighlightUpdate(response) {
       console.log("to remove:", highlights.toRemove);
       highlights.toAdd.sort();
       highlights.toRemove.sort();
-      $('p').html(function(idx, oldHtml){
-        var newHtml = oldHtml;
-        oldHtml = oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ");
-        oldHtml.filter(function(item, pos) {
-          return oldHtml.indexOf(item) == pos;
-        }).filter(function(s) {
-          return s != "";
-        }).forEach(function(word) {
-          var addIndex = highlights.toAdd.binaryIndexOf(word);
-          if (addIndex >= 0) {
-            var word = highlights.toAdd[addIndex];
-            console.log("to highlight:", word);
-            var replaceWith = "<b class='highlighted'><b class='word'>$1</b> (" + synonyms[word] + ")</b>$2";
-            if(!synonyms[word]) {
-                replaceWith = "<b class='highlighted'><b class='word'>$1</b></b>$2";
-            }
-            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), replaceWith);
-          }
-        });
-        
-        $(".highlighted").each(function(idx, element) {
-            var word = $(this).find(".word").text();
-            var removeIndex  = highlights.toRemove.binaryIndexOf(cleanWord(word));
-            if (removeIndex >= 0) {
-                $(this).replaceWith(word);
-            }
-        });
-        
-        return newHtml;
-      });
+      $('p').each(function(idx,elem){
+        var that = this;
+        setTimeout(function(){
+            var oldHtml = $(that).html();
+            var newHtml = oldHtml;
+            oldHtml = oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ");
+            oldHtml.filter(function(item, pos) {
+              return oldHtml.indexOf(item) == pos;
+            }).filter(function(s) {
+              return s != "";
+            }).forEach(function(word) {
+            
+              var addIndex = highlights.toAdd.binaryIndexOf(word);
+              if (addIndex >= 0) {
+                var word = highlights.toAdd[addIndex];
+                console.log("to highlight:", word);
+                var replaceWith = "<b class='highlighted'><b class='word'>$1</b> (" + synonyms[word] + ")</b>$2";
+                if(!synonyms[word]) {
+                    replaceWith = "<b class='highlighted'><b class='word'>$1</b></b>$2";
+                }
+                newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), replaceWith);
+              }
+            });
+            $(that).html(newHtml);
+        }, 1);
+
+    });
+    $(".highlighted").each(function(idx, element) {
+        var word = $(this).find(".word").text();
+        var removeIndex  = highlights.toRemove.binaryIndexOf(cleanWord(word));
+        if (removeIndex >= 0) {
+            $(this).replaceWith(word);
+        }
+    });
 }
 
 
