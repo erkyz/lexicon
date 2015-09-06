@@ -122,23 +122,37 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+var popupDOM = document.createElement('div');
+popupDOM.setAttribute('class', 'popup');
+document.body.appendChild(popupDOM);
+
+function renderPopup(mouseX, mouseY, selection) {
+  popupDOM.innerHTML = selection;
+  popupDOM.style.top = mouseY + 'px';
+  popupDOM.style.left = mouseX + 'px';
+  popupDOM.style.visibility = 'visible';
+}
+
+document.addEventListener('mouseup', function (e) {
+  var selection = window.getSelection().toString();
+  if (selection.length > 0) {
+    renderPopup(e.clientX, e.clientY, selection);
+  }
+  //var url = "http://elo-lasers.azurewebsites.net/get_definition?word=" + sText;
+}, false);
+
+// close popup on screen click
+document.addEventListener('mousedown', function(e) {
+  popupDOM.style.visibility = 'hidden';
+}, false);
+
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives
 function updateKnowingness(info, tab) {
   return true;
 };
 
-// TODO: we want this to make a nice little tooltip popup. There doesn't seem to
-//   be a nice way of doing this. The best way might just be to just overlay a
-//   div using javascript.
-function clickDefinition(info, tab) {
-  var sText = info.selectionText;
-  var url = "http://elo-lasers.azurewebsites.net/get_definition?word=" + sText;
-  window.open(url, '_blank');
-}
-
 // add right-click events
 chrome.contextMenus.create({title: "I know or don't know this word uhhhhhhhhh", contexts:["selection"], onclick: updateKnowingness});
-chrome.contextMenus.create({title: "Look up definition", contexts:["selection"], onclick: clickDefinition});
 
 // TODO openPopup
