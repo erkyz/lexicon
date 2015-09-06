@@ -40,12 +40,15 @@ chrome.runtime.onMessage.addListener(
     return true;
   });
 
-// TODO
+// TODO: change either word difficulty level or user's knowledge level to adjust
+//   to feedback on false negatives or false positives
 function updateKnowingness(info, tab) {
   return true;
 };
 
-// TODO
+// TODO: we want this to make a nice little tooltip popup. There doesn't seem to
+//   be a nice way of doing this. The best way might just be to just overlay a
+//   div using javascript.
 function clickDefinition(info, tab) {
   var sText = info.selectionText;
   var url = "http://elo-lasers.azurewebsites.net/get_definition?word=" + sText;
