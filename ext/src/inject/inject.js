@@ -63,29 +63,11 @@ function handleWordHighlightUpdate(response) {
             console.log("to highlight:", response.toAdd[addIndex]);
             newHtml = newHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[addIndex] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
           } else if (removeIndex >= 0) {
-            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( response.toRemove[i] ) + "</b>" , 'gi' ), response.toRemove[removeIndex]);
+            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( response.toRemove[removeIndex] ) + "</b>" , 'gi' ), response.toRemove[removeIndex]);
           }
         });
         return newHtml;
       });
-
-      });
-
-      console.log(response.toAdd);
-      console.log(response.toRemove);
-      for (var i = 0; i < response.toAdd.length; i++) {
-        console.log(response.toAdd[i]);
-        $('p').html(function(idx, oldHtml){
-          console.log("old", oldHtml);
-          var newHtml = oldHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[i] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
-          console.log("new", newHtml);
-          return newHtml;
-        });
-      }
-      for (var i = 0; i < response.toRemove.length; i++) {
-      $('body').unhighlight(response.toRemove[i]);
-
-      }
 }
 
 

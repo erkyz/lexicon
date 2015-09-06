@@ -11,10 +11,10 @@ function getDifficulty() {
 	chrome.storage.local.get("difficulty", function(items) {
 		if (!chrome.runtime.error) {
 			console.log(typeof items.difficulty);
-			if (typeof parseInt(items.difficulty) !== "number") {
+			if (typeof parseInt(items.difficulty) !== "number"
+				|| parseInt(items.difficulty) == 0) {
 				console.log("retrieved weird difficulty");
 			} else {
-
 				console.log("retrieved difficulty of " + items.difficulty);
 				myDifficulty = parseInt(items.difficulty);
 			}
@@ -49,12 +49,6 @@ function calculateHighlight(difficulties) {
 	var res = {toAdd:[], toRemove:[]};
 	$.each(difficulties, function(word,wordDifficulty) {
 		if (wordDifficulty > myDifficulty) {
-			console.log("adding highlight");
-			console.log(word);
-			console.log("my difficulty : " + myDifficulty);
-			console.log("word difficulty : " + wordDifficulty);
-			console.log(typeof myDifficulty);
-			console.log(typeof wordDifficulty);
 			res.toAdd.push(word);
 		} else if (wordDifficulty < myDifficulty) {
 			res.toRemove.push(word);
@@ -109,7 +103,7 @@ chrome.runtime.onMessage.addListener(
         sendResponse(toHighlight);
       });
     } else if (request.newDifficulty) {
-		var res = calculateHighlightUpdate(request.newDifficulty, localDifficulties);
+		var res = calculateHighlightUpdate(request.newDifficulty, cacheDifficulties);
 		myDifficulty = request.newDifficulty;
 		storeDifficulty();
 		updateHighlights(res);
