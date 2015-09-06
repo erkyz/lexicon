@@ -89,7 +89,7 @@ function handleWordHighlightUpdate(response) {
         $(".highlighted").each(function(idx, element) {
             var word = $(this).find(".word").text();
             var removeIndex  = highlights.toRemove.binaryIndexOf(cleanWord(word));
-            if (toRemove >= 0) {
+            if (removeIndex >= 0) {
                 $(this).replaceWith(word);
             }
         });
