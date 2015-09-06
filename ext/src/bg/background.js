@@ -26,8 +26,8 @@ function getDifficulty() {
 
 function sendDifficulty() {
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  		chrome.tabs.sendMessage(tabs[0].id, {newDifficulty:myDifficulty}, function(response) {
-  });
+   chrome.tabs.sendMessage(tabs[0].id, {newDifficulty:myDifficulty}, function(response) {
+    });
 	});
 	storeDifficulty();
 }
@@ -43,7 +43,6 @@ function storeDifficulty() {
 	});
 }
 
-
 function calculateHighlight(difficulties) {
 	console.log("my difficulty " + myDifficulty);
 	var res = {toAdd:[], toRemove:[]};
@@ -58,37 +57,30 @@ function calculateHighlight(difficulties) {
 	return res;
 }
 
-function calculateHighlightUpdate(newDifficulty, difficulties) {
-	var res = {toAdd:[], toRemove:[]};
-	$.each(difficulties, function(word,wordDifficulty) {
-		wordDifficulty = parseInt(wordDifficulty);
-		newDifficulty = parseInt(newDifficulty);
-		if (newDifficulty < myDifficulty) {
-			console.log("new difficulty : " + newDifficulty);
-			console.log("wordDifficulty : " + wordDifficulty);
-			if (wordDifficulty < myDifficulty && wordDifficulty > newDifficulty) {
-				console.log("nuuhhh you got dumber " + word);
-				res.toAdd.push(word);
-			}
-		} else {
-			if (wordDifficulty > myDifficulty && wordDifficulty < newDifficulty) {
-				console.log("old difficulty : " + myDifficulty);
-				console.log("word difficulty : " + wordDifficulty);
-				console.log("yayyy you got smarter " + word);
-				res.toRemove.push(word);
-			}
-		}
-	});
-	return res;
-}
+function calculateHighlightUpdate(pageWords) {
+	if (pageWords.length > 0) {
+		getDifficulties(myWords, function(difficulties) {
+			var highlights = {toAdd:[], toRemove:[]};
+			$.each(difficulties, function(word,wordDifficulty) {
+				wordDifficulty = parseInt(wordDifficulty);
+				newDifficulty = parseInt(newDifficulty);
+				if (newDifficulty < myDifficulty) {
+					console.log("new difficulty : " + newDifficulty);
+					console.log("wordDifficulty : " + wordDifficulty);
+					if (wordDifficulty < myDifficulty && wordDifficulty > newDifficulty) {
+						console.log("nuuhhh you got dumber " + word);
+						highlights.toAdd.push(word);
+					}
+				} else {
+					if (wordDifficulty > myDifficulty && wordDifficulty < newDifficulty) {
+						console.log("old difficulty : " + myDifficulty);
+						console.log("word difficulty : " + wordDifficulty);
+						console.log("yayyy you got smarter " + word);
+						highlights.toRemove.push(word);
+					}
+				}
+			});
 
-function updateHighlights(resp) {
-	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		console.log(resp);
-  		chrome.tabs.sendMessage(tabs[0].id, resp, function(response) {
-  });
-	});
-}
 
 var cacheDifficulties = {}; // cap?
 var cacheSynonyms = {};
@@ -104,16 +96,12 @@ chrome.runtime.onMessage.addListener(
                 });
           });
         } else if (request.newDifficulty) {
-			console.log("recieved new difficulty");
-			getDifficulties(
-			var highlights = calculateHighlightUpdate(request.newDifficulty, cacheDifficulties);
-			console.log("printing res");
-			console.log(res);
-			myDifficulty = request.newDifficulty;
-			storeDifficulty();
-			getSynonyms(highlights.toAdd, function(synonym_res) {
-				updateHighlights({"highlights": toHighlight, "synonyms": synonym_res});
+          	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+              chrome.tabs.sendMessage(tabs[0].id, {updatedPageDifficulty: quest.newDifficulty}, calculateHighlightUpdate);
             });
+            console.log("recieved new difficulty");
+            myDifficulty = request.newDifficulty;
+            storeDifficulty();
 
         } else if (request.init) {
             sendResponse();
@@ -121,6 +109,11 @@ chrome.runtime.onMessage.addListener(
         return true;
     }
 );
+
+// send tabs that have been used before the new myDifficulty
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+  chrome.tabs.sendMessage(activeInfo.tabId,{updatedPageDifficulty: myDifficulty}, calculateHighlightUpdate);
+});
 
 var popupDOM = document.createElement('div');
 popupDOM.setAttribute('class', 'popup');
@@ -145,6 +138,7 @@ document.addEventListener('mouseup', function (e) {
 document.addEventListener('mousedown', function(e) {
   popupDOM.style.visibility = 'hidden';
 }, false);
+
 
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives
