@@ -1,6 +1,5 @@
 var myDifficulty = 40;
-var cacheDifficulties = {}; // cap?
-var cacheSynonyms = {};
+
 
 function calculateHighlight(difficulties) {
   var res = {toAdd:[], toRemove:[]};
@@ -16,53 +15,23 @@ function calculateHighlight(difficulties) {
 
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    if (request.getDifficulties) {
-      var localDifficulties = {};
-      var localSynonyms = {};
-      var difficultiesNeeded = [];
-      var synonymsNeeded = [];
-      $.each(request.getDifficulties, function(idx, word) {
-        if (cacheDifficulties[word]) {
-           localDifficulties[word] = cacheDifficulties[word];
+    function(request, sender, sendResponse) {
+        if (request.getDifficulties) {
+            getDifficulties(request.getDifficulties, function(res) {
+                var toHighlight = calculateHighlight(res);
+                getSynonyms(toHighlight.toAdd, function(synonym_res) {
+                    sendResponse({"difficulties": toHighlight, "synonyms": synonym_res});
+                });
+          });
+        } else if (request.newDifficulty) {
+            chrome.runtime.sendMessage(calculateHighlight(request.newDifficulty));
+            myDifficulty = request.newDifficulty;
+        } else if (request.init) {
+            sendResponse();
         }
-        else {
-            difficultiesNeeded.push(word);
-        }
-      });
-      
-      getDifficulties(difficultiesNeeded, function(res) {
-        
-        for (var attrname in res) { 
-            localDifficulties[attrname] = res[attrname];
-            cacheDifficulties[attrname] = res[attrname]; 
-        }
-        var toHighlight = calculateHighlight(localDifficulties);
-        
-        $.each(toHighlight.toAdd, function(idx, word) {
-            if (cacheSynonyms[word]) {
-               localSynonyms[word] = cacheSynonyms[word];
-            }
-            else {
-                synonymsNeeded.push(word);
-            }
-        });
-        getSynonyms(synonymsNeeded, function(synonym_res) {
-            for (var attrname in synonym_res) { 
-                localSynonyms[attrname] = synonym_res[attrname]; 
-                cacheSynonyms[attrname] = synonym_res[attrname];
-            }
-            sendResponse({"difficulties": toHighlight, "synonyms": localSynonyms});
-        });
-      });
-    } else if (request.newDifficulty) {
-        chrome.runtime.sendMessage(calculateHighlight(request.newDifficulty));
-        myDifficulty = request.newDifficulty;
-    } else if (request.init) {
-        sendResponse();
+        return true;
     }
-    return true;
-  });
+);
 
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives
