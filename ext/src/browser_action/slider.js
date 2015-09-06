@@ -1,43 +1,29 @@
 var difficulty;
+var slider = $('input[type="range"]')[0];
 
-function getDifficulty() {
-	chrome.storage.local.get("difficulty", function(items) {
-		if (!chrome.runtime.error) {
-			console.log(items);
-			if (items.difficulty == undefined) {
-				console.log("retrieved undefined difficulty");
-				difficulty = 50;
-			} else {
-				difficulty = items.difficulty;
-				console.log("retrieved difficulty of " + difficulty);
-			}
-			var slider = $('input[type="range"]')[0];
+chrome.runtime.onMessage.addListener(
+	function(request, sender, sendResponse) {
+		if (request.newDifficulty) {
+			difficulty = request.newDifficulty;
 			slider.value = difficulty;
-			sendDifficulty();
-		} else {
-			console.log("store difficulty error");
 		}
 	});
-}
 
-function sendDifficulty() {
-	chrome.storage.local.set({"difficulty" : difficulty}, function() {
-		if (chrome.runtime.error) {
-			console.log("store difficulty error");
-		} else {
-			console.log("stored successful");
-			console.log(difficulty);
-		}
-	});
-	chrome.runtime.sendMessage({newDifficulty : difficulty});
-}
-getDifficulty();
+chrome.runtime.sendMessage({getDifficulty:true}, function(response) {
+	if (response !== undefined) {
+		difficulty = response;
+		slider.value = difficulty;
+	}
+});
 
+console.log(difficulty);
 $('input[type="range"]').change(function() {
-	// undefined means we are still trying to retrieve difficulty from storage
-	if (difficulty != undefined) {
+	// undfined means we are still trying to retrieve difficulty from
+	// background
 		console.log("value : " + this.value);
-		difficulty = this.value;
-		sendDifficulty();
+		console.log("difficulty : " + difficulty);
+	if (difficulty != undefined) {
+		difficulty = parseInt(this.value);
+		chrome.runtime.sendMessage({newDifficulty:this.value});
 	}
 });

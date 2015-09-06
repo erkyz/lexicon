@@ -5,6 +5,15 @@ $(document).ready(function() {
     .attr("href", chrome.extension.getURL('src/inject/inject.css')));
 });
 
+var myWords = [];
+var myDifficulty = 40;
+
+chrome.runtime.onMessage.addListener(
+	function(request, sender, sendResponse) {
+		if (request.highlightUpdate) {
+			handleWordHighlightUpdate(request.highlightUpdate);
+		}
+	});
 chrome.runtime.sendMessage({init:true}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
 	if (document.readyState === "complete") {
@@ -33,34 +42,42 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
+	mywords = uniqueWords;
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-      console.log("to add:", response.toAdd);
-      console.log("to remove:", response.toRemove);
-      response.toAdd.sort();
-      response.toRemove.sort();
+		handleWordHighlightUpdate(response);
+    });
+	}
+	}, 10);
+});
+
+function handleWordHighlightUpdate(response) {
+	 var highlights = response.highlights;
+	 console.log("highlights " + highlights);
+	 var synonyms = response.synonyms;
+   	  console.log("to add:", highlights.toAdd);
+      console.log("to remove:", highlights.toRemove);
+      highlights.toAdd.sort();
+      highlights.toRemove.sort();
       $('p').html(function(idx, oldHtml){
         var newHtml = oldHtml;
         oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
           return s != "";
         }).forEach(function(word) {
-          addIndex = response.toAdd.binaryIndexOf(word);
-          removeIndex = response.toRemove.binaryIndexOf(word);
+          addIndex = highlights.toAdd.binaryIndexOf(word);
+          removeIndex = highlights.toRemove.binaryIndexOf(word);
           if (addIndex >= 0) {
-            console.log("to highlight:", response.toAdd[addIndex]);
-            newHtml = newHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[addIndex] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
+            var word = highlights.toAdd[addIndex];
+            console.log("to highlight:", word);
+            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>$2");
           } else if (removeIndex >= 0) {
-            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( response.toRemove[i] ) + "</b>" , 'gi' ), response.toRemove[removeIndex]);
+            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( highlights.toRemove[removeIndex] ) + " \([-a-zA-Z']*\)</b>" , 'gi' ), highlights.toRemove[removeIndex]);
           }
         });
         return newHtml;
       });
-     
-      });
+}
 
-	}
-	}, 10);
-});
 
 
 /** from oli.me.uk
@@ -73,16 +90,16 @@ chrome.runtime.sendMessage({init:true}, function(response) {
  */
 function binaryIndexOf(searchElement) {
     'use strict';
- 
+
     var minIndex = 0;
     var maxIndex = this.length - 1;
     var currentIndex;
     var currentElement;
- 
+
     while (minIndex <= maxIndex) {
         currentIndex = (minIndex + maxIndex) / 2 | 0;
         currentElement = this[currentIndex];
- 
+
         if (currentElement < searchElement) {
             minIndex = currentIndex + 1;
         }
@@ -93,7 +110,7 @@ function binaryIndexOf(searchElement) {
             return currentIndex;
         }
     }
- 
+
     return -1;
 }
 Array.prototype.binaryIndexOf = binaryIndexOf;
