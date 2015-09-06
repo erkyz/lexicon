@@ -2,6 +2,7 @@ var url = "http://elo-lasers.azurewebsites.net/";
 
 var cacheDifficulties = {}; // cap?
 var cacheSynonyms = {};
+var cacheDefinitions = {};
 var REDACTED = "REDACTED";
 
 //Public methods
@@ -13,6 +14,10 @@ function getSynonyms(words, callback) {
     fetchOrCache(words, fetchSynonyms, cacheSynonyms, callback);
 }
 
+function getDefinitions(words, callback) {
+    fetchOrCache(words, fetchDefinitions, cacheDefinitions, callback);
+}
+
 
 //Private methods
 function fetchDifficulties(words, callback) {
@@ -21,6 +26,10 @@ function fetchDifficulties(words, callback) {
 
 function fetchSynonyms(words, callback) {
     $.post(url + "get_synonyms", {words: JSON.stringify(words)}, callback);
+}
+
+function fetchDefinitions(words, callback) {
+    $.post(url + "get_definitions", {words: JSON.stringify(words)}, callback);
 }
 
 function fetchOrCache(words, fetch, cache, callback) {
