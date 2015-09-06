@@ -1,4 +1,4 @@
-var myDifficulty = 50;
+var myDifficulty = 40;
 var cacheDifficulties = {} // cap?
 
 function calculateHighlight(difficulties) {
