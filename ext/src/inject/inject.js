@@ -33,24 +33,24 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-    console.log(uniqueWords);
-    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-      console.log("to add:", response.toAdd);
-      console.log("to remove:", response.toRemove);
-      response.toAdd.sort();
-      response.toRemove.sort();
+    chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(resp) {
+      var difficulties = resp.difficulties;
+      var synonyms = resp.synonyms;
+      difficulties.toAdd.sort();
+      difficulties.toRemove.sort();
       $('p').html(function(idx, oldHtml){
         var newHtml = oldHtml;
         oldHtml.toLowerCase().replace(/[^a-zA-Z'.]/gi, " ").replace(/\.+$/, " ").trim().split(" ").filter(function(s) {
           return s != "";
         }).forEach(function(word) {
-          addIndex = response.toAdd.binaryIndexOf(word);
-          removeIndex = response.toRemove.binaryIndexOf(word);
+          addIndex = difficulties.toAdd.binaryIndexOf(word);
+          removeIndex = difficulties.toRemove.binaryIndexOf(word);
           if (addIndex >= 0) {
-            console.log("to highlight:", response.toAdd[addIndex]);
-            newHtml = newHtml.replace(new RegExp( "( )(" + preg_quote( response.toAdd[addIndex] ) + ")([ ?!,.:])" , 'gi' ), "$1<b class='highlighted'>$2</b>$3");
+            var word = difficulties.toAdd[addIndex];
+            console.log("to highlight:", word);
+            newHtml = newHtml.replace(new RegExp( "(" + preg_quote( word ) + ")([ ?!,.:])" , 'gi' ), "<b class='highlighted'>$1 (" + synonyms[word] + ")</b>$2");
           } else if (removeIndex >= 0) {
-            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( response.toRemove[removeIndex] ) + "</b>" , 'gi' ), response.toRemove[removeIndex]);
+            newHtml = newHtml.replace(new RegExp( "<b class='highlighted'>" + preg_quote( difficulties.toRemove[removeIndex] ) + " \([-a-zA-Z']*\)</b>" , 'gi' ), difficulties.toRemove[removeIndex]);
           }
         });
         return newHtml;
