@@ -13,7 +13,7 @@
   "background": {
     "scripts": [
       "js/jquery/jquery.min.js",
-      "src/http/difficulty.js",
+      "src/http/backend.js",
       "src/bg/background.js"
     ],
     "persistent": true

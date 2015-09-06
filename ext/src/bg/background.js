@@ -43,6 +43,7 @@ function storeDifficulty() {
 	});
 }
 
+
 function calculateHighlight(difficulties) {
 	console.log("my difficulty " + myDifficulty);
 	var res = {toAdd:[], toRemove:[]};
@@ -60,6 +61,8 @@ function calculateHighlight(difficulties) {
 function calculateHighlightUpdate(newDifficulty, difficulties) {
 	var res = {toAdd:[], toRemove:[]};
 	$.each(difficulties, function(word,wordDifficulty) {
+		wordDifficulty = parseInt(wordDifficulty);
+		newDifficulty = parseInt(newDifficulty);
 		if (newDifficulty < myDifficulty) {
 			console.log("new difficulty : " + newDifficulty);
 			console.log("wordDifficulty : " + wordDifficulty);
@@ -79,10 +82,10 @@ function calculateHighlightUpdate(newDifficulty, difficulties) {
 	return res;
 }
 
-function updateHighlights(highlights) {
+function updateHighlights(resp) {
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		console.log(highlights);
-  		chrome.tabs.sendMessage(tabs[0].id, {"highlightUpdate" : {"highlights":highlights}}, function(response) {
+		console.log(resp);
+  		chrome.tabs.sendMessage(tabs[0].id, resp, function(response) {
   });
 	});
 }
@@ -92,63 +95,32 @@ var cacheSynonyms = {};
 
 //example of using a message handler from the inject scripts
 chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    if (request.getDifficulties) {
-      var localDifficulties = {};
-      var localSynonyms = {};
-      var difficultiesNeeded = [];
-      var synonymsNeeded = [];
-      $.each(request.getDifficulties, function(idx, word) {
-        if (cacheDifficulties[word]) {
-           localDifficulties[word] = cacheDifficulties[word];
-        }
-        else {
-            difficultiesNeeded.push(word);
-        }
-      });
+    function(request, sender, sendResponse) {
+        if (request.getDifficulties) {
+            getDifficulties(request.getDifficulties, function(res) {
+                var highlights = calculateHighlight(res);
+                getSynonyms(highlights.toAdd, function(synonym_res) {
+                    sendResponse({"highlights": toHighlight, "synonyms": synonym_res});
+                });
+          });
+        } else if (request.newDifficulty) {
+			console.log("recieved new difficulty");
+			getDifficulties(
+			var highlights = calculateHighlightUpdate(request.newDifficulty, cacheDifficulties);
+			console.log("printing res");
+			console.log(res);
+			myDifficulty = request.newDifficulty;
+			storeDifficulty();
+			getSynonyms(highlights.toAdd, function(synonym_res) {
+				updateHighlights({"highlights": toHighlight, "synonyms": synonym_res});
+            });
 
-	  console.log("fetching difficulties");
-      getDifficulties(difficultiesNeeded, function(res) {
-
-        for (var attrname in res) {
-            localDifficulties[attrname] = parseInt(res[attrname]);
-            cacheDifficulties[attrname] = parseInt(res[attrname]);
+        } else if (request.init) {
+            sendResponse();
         }
-        var toHighlight = calculateHighlight(localDifficulties);
-
-        $.each(toHighlight.toAdd, function(idx, word) {
-            if (cacheSynonyms[word]) {
-               localSynonyms[word] = cacheSynonyms[word];
-            }
-            else {
-                synonymsNeeded.push(word);
-            }
-        });
-		console.log('fetching synonyms');
-        getSynonyms(synonymsNeeded, function(synonym_res) {
-            for (var attrname in synonym_res) {
-                localSynonyms[attrname] = synonym_res[attrname];
-                cacheSynonyms[attrname] = synonym_res[attrname];
-            }
-			console.log('got synonyms');
-            sendResponse({"highlights": toHighlight, "synonyms": localSynonyms});
-        });
-      });
-    } else if (request.newDifficulty) {
-		console.log("recieved new difficulty");
-		var res = calculateHighlightUpdate(request.newDifficulty, cacheDifficulties);
-		console.log("printing res");
-		console.log(res);
-		myDifficulty = request.newDifficulty;
-		storeDifficulty();
-		updateHighlights(res);
-    } else if (request.getDifficulty) {
-		sendResponse(myDifficulty);
-	} else if (request.init) {
-        sendResponse();
+        return true;
     }
-    return true;
-  });
+);
 
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives

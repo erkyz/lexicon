@@ -5,6 +5,9 @@ $(document).ready(function() {
     .attr("href", chrome.extension.getURL('src/inject/inject.css')));
 });
 
+var myWords = [];
+var myDifficulty = 40;
+
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		if (request.highlightUpdate) {
@@ -39,6 +42,7 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
+	mywords = uniqueWords;
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
 		handleWordHighlightUpdate(response);
