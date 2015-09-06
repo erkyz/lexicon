@@ -14,6 +14,7 @@ chrome.runtime.onMessage.addListener(
 			handleWordHighlightUpdate(request.highlightUpdate);
 		}
 	});
+
 chrome.runtime.sendMessage({init:true}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
 	if (document.readyState === "complete") {
@@ -42,10 +43,10 @@ chrome.runtime.sendMessage({init:true}, function(response) {
     uniqueWords = words.filter(function(item, pos) {
       return words.indexOf(item) == pos;
     });
-	mywords = uniqueWords;
+	  mywords = uniqueWords;
     console.log(uniqueWords);
     chrome.runtime.sendMessage({getDifficulties:uniqueWords}, function(response) {
-		handleWordHighlightUpdate(response);
+		  handleWordHighlightUpdate(response);
     });
 	}
 	}, 10);
@@ -80,7 +81,6 @@ function handleWordHighlightUpdate(response) {
         return newHtml;
       });
 }
-
 
 
 /** from oli.me.uk

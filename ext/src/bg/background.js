@@ -26,8 +26,8 @@ function getDifficulty() {
 
 function sendDifficulty() {
 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  		chrome.tabs.sendMessage(tabs[0].id, {newDifficulty:myDifficulty}, function(response) {
-  });
+   chrome.tabs.sendMessage(tabs[0].id, {newDifficulty:myDifficulty}, function(response) {
+    });
 	});
 	storeDifficulty();
 }
@@ -42,7 +42,6 @@ function storeDifficulty() {
 		}
 	});
 }
-
 
 function calculateHighlight(difficulties) {
 	console.log("my difficulty " + myDifficulty);
@@ -82,13 +81,6 @@ function calculateHighlightUpdate(newDifficulty, difficulties) {
 	return res;
 }
 
-function updateHighlights(resp) {
-	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		console.log(resp);
-  		chrome.tabs.sendMessage(tabs[0].id, resp, function(response) {
-  });
-	});
-}
 
 var cacheDifficulties = {}; // cap?
 var cacheSynonyms = {};
@@ -104,16 +96,12 @@ chrome.runtime.onMessage.addListener(
                 });
           });
         } else if (request.newDifficulty) {
-			console.log("recieved new difficulty");
-			getDifficulties(
-			var highlights = calculateHighlightUpdate(request.newDifficulty, cacheDifficulties);
-			console.log("printing res");
-			console.log(res);
-			myDifficulty = request.newDifficulty;
-			storeDifficulty();
-			getSynonyms(highlights.toAdd, function(synonym_res) {
-				updateHighlights({"highlights": toHighlight, "synonyms": synonym_res});
-            });
+          	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+              chrome.tabs.sendMessage(tabs[0].id, {updatedPageDifficulty: quest.newDifficulty}, calculateHighlightUpdate);
+            }); 
+            console.log("recieved new difficulty");
+            myDifficulty = request.newDifficulty;
+            storeDifficulty();
 
         } else if (request.init) {
             sendResponse();
@@ -121,6 +109,12 @@ chrome.runtime.onMessage.addListener(
         return true;
     }
 );
+
+// send tabs that have been used before the new myDifficulty
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+  chrome.tabs.sendMessage(activeInfo.tabId,{updatedPageDifficulty: myDifficulty}, calculateHighlightUpdate); 
+});
+
 
 // TODO: change either word difficulty level or user's knowledge level to adjust
 //   to feedback on false negatives or false positives
