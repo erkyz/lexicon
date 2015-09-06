@@ -1,4 +1,4 @@
-var url = "http://elo-lasers.azurewebsites.net/";
+var url = "http://elo-lasers.herokuapp.com/";
 
 var cacheDifficulties = {}; // cap?
 var cacheSynonyms = {};
